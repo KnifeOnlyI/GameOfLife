@@ -1,21 +1,12 @@
-#include <iostream>
+#include <SFML/Graphics.hpp>
 
 #include "game_of_life/GameConwayRules.hpp"
 
 int main()
 {
-    /*
-     * Example file format :
-     *
-     * 01110
-     * 00100
-     * 01010
-     * 00100
-     * 01010
-     */
-    GOL::GameConwayRules map {"start.gol"};
+    GOL::GameConwayRules game;
 
-    map.start(50);
+    game.start();
 
     return 0;
 }

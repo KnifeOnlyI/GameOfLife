@@ -2,6 +2,11 @@
 
 namespace GOL
 {
+GameConwayRules::GameConwayRules()
+    : AbstractGame {}
+{
+}
+
 GameConwayRules::GameConwayRules(const std::array<std::array<bool, MAP_WIDTH>, MAP_HEIGHT> &map)
     : AbstractGame {map}
 {

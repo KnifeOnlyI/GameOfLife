@@ -13,6 +13,8 @@ namespace GOL
 class GameConwayRules : public AbstractGame
 {
 public:
+    GameConwayRules();
+
     explicit GameConwayRules(const std::array<std::array<bool, MAP_WIDTH>, MAP_HEIGHT> &map);
 
     explicit GameConwayRules(const std::string &configFile);

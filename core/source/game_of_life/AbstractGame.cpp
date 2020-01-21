@@ -1,15 +1,36 @@
+#include <SFML/Window/Event.hpp>
 #include <iostream>
 #include <fstream>
+#include <chrono>
+#include <thread>
+#include <random>
 
 #include "game_of_life/AbstractGame.hpp"
 
 namespace GOL
 {
-AbstractGame::AbstractGame(const std::array<std::array<bool, MAP_WIDTH>, MAP_HEIGHT> &map)
+AbstractGame::AbstractGame()
+    : _window {sf::VideoMode(CELL_WIDTH * MAP_WIDTH, CELL_WIDTH * MAP_HEIGHT), "Game of life"}
 {
-    for (int x {0}; x < MAP_WIDTH; x++)
+    std::default_random_engine generator;
+
+    std::uniform_int_distribution<int> distribution {0, 2};
+
+    for (unsigned x {0}; x < MAP_WIDTH; x++)
     {
-        for (int y {0}; y < MAP_HEIGHT; y++)
+        for (unsigned y {0}; y < MAP_HEIGHT; y++)
+        {
+            _map[x][y].isAlive = (distribution(generator)) == 1;
+        }
+    }
+}
+
+AbstractGame::AbstractGame(const std::array<std::array<bool, MAP_WIDTH>, MAP_HEIGHT> &map)
+    : _window {sf::VideoMode(CELL_WIDTH * MAP_WIDTH, CELL_WIDTH * MAP_HEIGHT), "Game of life"}
+{
+    for (unsigned x {0}; x < MAP_WIDTH; x++)
+    {
+        for (unsigned y {0}; y < MAP_HEIGHT; y++)
         {
             _map[x][y].isAlive = map[x][y];
         }
@@ -17,6 +38,7 @@ AbstractGame::AbstractGame(const std::array<std::array<bool, MAP_WIDTH>, MAP_HEI
 }
 
 AbstractGame::AbstractGame(const std::string &configFile)
+    : _window {sf::VideoMode(CELL_WIDTH * MAP_WIDTH, CELL_WIDTH * MAP_HEIGHT), "Game of life"}
 {
     const std::array<std::array<bool, MAP_WIDTH>, MAP_HEIGHT> data {};
 
@@ -30,7 +52,7 @@ AbstractGame::AbstractGame(const std::string &configFile)
     {
         nbChar = line.size();
 
-        for (int y {0}; (y < MAP_WIDTH) && (y < nbChar); y++)
+        for (unsigned int y {0}; (y < MAP_WIDTH) && (y < nbChar); y++)
         {
             _map[x][y].isAlive = line[y] == '1';
         }
@@ -39,21 +61,30 @@ AbstractGame::AbstractGame(const std::string &configFile)
     }
 }
 
-void AbstractGame::start(unsigned int nbTurn)
+void AbstractGame::start()
 {
-    for (int i = 0; i < nbTurn; i++)
+    while (_window.isOpen())
     {
+        sf::Event event {};
+
+        while (_window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
+                _window.close();
+            }
+        }
+
+        _window.clear();
         executeOneTurn();
+        _window.display();
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(WAITING_TIME_MS));
     }
 }
 
 void AbstractGame::executeOneTurn()
 {
-    if (_turnNumber == 0)
-    {
-        display();
-    }
-
     _turnNumber++;
 
     for (int x {0}; x < MAP_WIDTH; x++)
@@ -261,23 +292,25 @@ unsigned int AbstractGame::getNbAliveCellAround(unsigned int x, unsigned int y) 
     return results;
 }
 
-void AbstractGame::display() const
+void AbstractGame::display()
 {
-    std::cout << "Turn " << _turnNumber << "\n\n";
-
-    for (int x {0}; x < MAP_WIDTH; x++)
+    for (unsigned int x {0}; x < MAP_WIDTH; x++)
     {
-        for (int y {0}; y < MAP_HEIGHT; y++)
+        for (unsigned int y {0}; y < MAP_HEIGHT; y++)
         {
             if (_map[x][y].isAlive)
             {
-                std::cout << "  O";
+                _cellShape.setFillColor(sf::Color {255, 255, 255});
             }
+            else
+            {
+                _cellShape.setFillColor(sf::Color {0, 0, 0});
+            }
+
+            _cellShape.setPosition(CELL_WIDTH * y, CELL_WIDTH * x);
+
+            _window.draw(_cellShape);
         }
-
-        std::cout << '\n';
     }
-
-    std::cout << "=================" << '\n';
 }
 }

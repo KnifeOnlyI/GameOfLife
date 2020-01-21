@@ -1,6 +1,8 @@
 #ifndef GAMEOFLIFE_ABSTRACTGAME_HPP
 #define GAMEOFLIFE_ABSTRACTGAME_HPP
 
+#include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
 #include <array>
 
 #include "game_of_life/CellState.hpp"
@@ -16,10 +18,10 @@ class AbstractGame
 {
 public:
     /**
-     * Initialize the map
-     *
-     * \param map The map configuration on the first turn
+     * Initialize the map with random cell states
      */
+    AbstractGame();
+
     explicit AbstractGame(const std::array<std::array<bool, MAP_WIDTH>, MAP_HEIGHT> &map);
 
     /**
@@ -31,10 +33,8 @@ public:
 
     /**
      * Start the game and execute the number of turns
-     *
-     * \param nbTurn The numbers of turn to execute
      */
-    void start(unsigned int nbTurn);
+    void start();
 
     /**
      * Execute one turn
@@ -155,15 +155,19 @@ public:
     /**
      * Display the map
      */
-    void display() const;
+    void display();
 
 private:
+    /** \var The window */
+    sf::RenderWindow _window;
+
+    /** \var The cell shape */
+    sf::RectangleShape _cellShape {sf::Vector2f {CELL_WIDTH, CELL_WIDTH}};
+
     /** \var The turn number */
     unsigned int _turnNumber {0};
 
-    /**
-     * \var Represent the map
-     */
+    /** \var Represent the map */
     std::array<std::array<GOL::CellState, MAP_WIDTH>, MAP_HEIGHT> _map;
 };
 }
