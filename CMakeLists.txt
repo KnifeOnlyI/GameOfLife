@@ -23,5 +23,6 @@ file(
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
+include_directories(${CMAKE_SOURCE_DIR}/core/header)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
