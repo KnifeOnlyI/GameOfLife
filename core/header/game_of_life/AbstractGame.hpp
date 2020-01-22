@@ -42,11 +42,6 @@ public:
     void executeOneTurn();
 
     /**
-     * Update the map corresponding to all cell's state next states
-     */
-    void update();
-
-    /**
      * Check the specified cell and determine the next state
      *
      * \param cellState The cell to analyze
@@ -152,23 +147,21 @@ public:
      */
     [[nodiscard]] unsigned int getNbAliveCellAround(unsigned int x, unsigned int y) const;
 
-    /**
-     * Display the map
-     */
-    void display();
-
 private:
     /** \var The window */
-    sf::RenderWindow _window;
+    sf::RenderWindow _window {sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Game of life", sf::Style::Fullscreen};
 
     /** \var The cell shape */
-    sf::RectangleShape _cellShape {sf::Vector2f {CELL_WIDTH, CELL_WIDTH}};
+    sf::RectangleShape _cellShape {sf::Vector2f {CELL_WIDTH, CELL_HEIGHT}};
+
+    sf::Color _aliveCellColor {255, 255, 255};
+    sf::Color _deadCellColor {0, 0, 0};
 
     /** \var The turn number */
     unsigned int _turnNumber {0};
 
-    /** \var Represent the map */
-    std::array<std::array<GOL::CellState, MAP_WIDTH>, MAP_HEIGHT> _map;
+    /** \var Represent the map. Pointer is used to not limited by stack memory allocation mechanism */
+    std::unique_ptr<std::array<std::array<GOL::CellState, MAP_HEIGHT>, MAP_WIDTH >> _map;
 };
 }
 

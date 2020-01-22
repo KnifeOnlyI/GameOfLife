@@ -10,37 +10,38 @@
 namespace GOL
 {
 AbstractGame::AbstractGame()
-    : _window {sf::VideoMode(CELL_WIDTH * MAP_WIDTH, CELL_WIDTH * MAP_HEIGHT), "Game of life"}
 {
-    std::default_random_engine generator;
+    std::default_random_engine generator {(unsigned long) std::chrono::system_clock::now().time_since_epoch().count()};
 
-    std::uniform_int_distribution<int> distribution {0, 2};
+    std::uniform_int_distribution<int> distribution {0, 25};
 
-    for (unsigned x {0}; x < MAP_WIDTH; x++)
+    _map = std::make_unique<std::array<std::array<GOL::CellState, MAP_HEIGHT>, MAP_WIDTH>>();
+
+    for (int x {0}; x < MAP_WIDTH; x++)
     {
-        for (unsigned y {0}; y < MAP_HEIGHT; y++)
+        for (int y {0}; y < MAP_HEIGHT; y++)
         {
-            _map[x][y].isAlive = (distribution(generator)) == 1;
+            _map->at(x)[y].isAlive = distribution(generator) == 1;
         }
     }
 }
 
 AbstractGame::AbstractGame(const std::array<std::array<bool, MAP_WIDTH>, MAP_HEIGHT> &map)
-    : _window {sf::VideoMode(CELL_WIDTH * MAP_WIDTH, CELL_WIDTH * MAP_HEIGHT), "Game of life"}
 {
-    for (unsigned x {0}; x < MAP_WIDTH; x++)
+    _map = std::make_unique<std::array<std::array<GOL::CellState, MAP_HEIGHT>, MAP_WIDTH>>();
+
+    for (unsigned int x {0}; x < MAP_WIDTH; x++)
     {
-        for (unsigned y {0}; y < MAP_HEIGHT; y++)
+        for (unsigned int y {0}; y < MAP_HEIGHT; y++)
         {
-            _map[x][y].isAlive = map[x][y];
+            _map->at(x)[y].isAlive = map[x][y];
         }
     }
 }
 
 AbstractGame::AbstractGame(const std::string &configFile)
-    : _window {sf::VideoMode(CELL_WIDTH * MAP_WIDTH, CELL_WIDTH * MAP_HEIGHT), "Game of life"}
 {
-    const std::array<std::array<bool, MAP_WIDTH>, MAP_HEIGHT> data {};
+    const std::array<std::array<bool, MAP_HEIGHT>, MAP_WIDTH> data {};
 
     std::ifstream file {configFile};
     std::string line;
@@ -54,7 +55,7 @@ AbstractGame::AbstractGame(const std::string &configFile)
 
         for (unsigned int y {0}; (y < MAP_WIDTH) && (y < nbChar); y++)
         {
-            _map[x][y].isAlive = line[y] == '1';
+            _map->at(x)[y].isAlive = line[y] == '1';
         }
 
         x++;
@@ -81,42 +82,35 @@ void AbstractGame::start()
 
         std::this_thread::sleep_for(std::chrono::milliseconds(WAITING_TIME_MS));
     }
+
+    std::cout << "Turn numbers : " << _turnNumber << '\n';
 }
 
 void AbstractGame::executeOneTurn()
 {
     _turnNumber++;
 
-    for (int x {0}; x < MAP_WIDTH; x++)
+    for (unsigned int x {0}; x < MAP_WIDTH; x++)
     {
-        for (int y {0}; y < MAP_HEIGHT; y++)
+        for (unsigned int y {0}; y < MAP_HEIGHT; y++)
         {
-            GOL::CellState &cellState {_map[x][y]};
+            GOL::CellState &cellState {_map->at(x)[y]};
             unsigned int nbAliveCellAround {getNbAliveCellAround(x, y)};
 
             checkCell(cellState, nbAliveCellAround);
-        }
-    }
 
-    update();
-    display();
-}
-
-void AbstractGame::update()
-{
-    for (int x {0}; x < MAP_WIDTH; x++)
-    {
-        for (int y {0}; y < MAP_HEIGHT; y++)
-        {
-            CellState &cellState {_map[x][y]};
-
-            if (cellState.nextState == GOL::CellNextState::UNKNOWN)
+            if (cellState.isAlive)
             {
-                display();
-                throw std::runtime_error("The next state of cell is UNKNOWN !");
+                _cellShape.setFillColor(_aliveCellColor);
+            }
+            else
+            {
+                _cellShape.setFillColor(_deadCellColor);
             }
 
-            cellState.isAlive = cellState.nextState == GOL::CellNextState::ALIVE;
+            _cellShape.setPosition(CELL_WIDTH * x, CELL_WIDTH * y);
+
+            _window.draw(_cellShape);
         }
     }
 }
@@ -132,7 +126,7 @@ bool AbstractGame::topIsAlive(unsigned int x, unsigned int y) const
     }
     else
     {
-        return _map[realX][y].isAlive;
+        return _map->at(realX)[y].previously;
     }
 }
 
@@ -147,7 +141,7 @@ bool AbstractGame::bottomIsAlive(unsigned int x, unsigned int y) const
     }
     else
     {
-        return _map[realX][y].isAlive;
+        return _map->at(realX)[y].isAlive;
     }
 }
 
@@ -162,7 +156,7 @@ bool AbstractGame::leftIsAlive(unsigned int x, unsigned int y) const
     }
     else
     {
-        return _map[x][realY].isAlive;
+        return _map->at(x)[realY].previously;
     }
 }
 
@@ -177,7 +171,7 @@ bool AbstractGame::rightIsAlive(unsigned int x, unsigned int y) const
     }
     else
     {
-        return _map[x][realY].isAlive;
+        return _map->at(x)[realY].isAlive;
     }
 }
 
@@ -193,7 +187,7 @@ bool AbstractGame::cornerTopLeftIsAlive(unsigned int x, unsigned int y) const
     }
     else
     {
-        return _map[realX][realY].isAlive;
+        return _map->at(realX)[realY].previously;
     }
 }
 
@@ -209,7 +203,7 @@ bool AbstractGame::cornerTopRightIsAlive(unsigned int x, unsigned int y) const
     }
     else
     {
-        return _map[realX][realY].isAlive;
+        return _map->at(realX)[realY].previously;
     }
 }
 
@@ -225,7 +219,7 @@ bool AbstractGame::cornerBottomLeftIsAlive(unsigned int x, unsigned int y) const
     }
     else
     {
-        return _map[realX][realY].isAlive;
+        return _map->at(realX)[realY].previously;
     }
 }
 
@@ -241,7 +235,7 @@ bool AbstractGame::cornerBottomRightIsAlive(unsigned int x, unsigned int y) cons
     }
     else
     {
-        return _map[realX][realY].isAlive;
+        return _map->at(realX)[realY].isAlive;
     }
 }
 
@@ -290,27 +284,5 @@ unsigned int AbstractGame::getNbAliveCellAround(unsigned int x, unsigned int y) 
     }
 
     return results;
-}
-
-void AbstractGame::display()
-{
-    for (unsigned int x {0}; x < MAP_WIDTH; x++)
-    {
-        for (unsigned int y {0}; y < MAP_HEIGHT; y++)
-        {
-            if (_map[x][y].isAlive)
-            {
-                _cellShape.setFillColor(sf::Color {255, 255, 255});
-            }
-            else
-            {
-                _cellShape.setFillColor(sf::Color {0, 0, 0});
-            }
-
-            _cellShape.setPosition(CELL_WIDTH * y, CELL_WIDTH * x);
-
-            _window.draw(_cellShape);
-        }
-    }
 }
 }

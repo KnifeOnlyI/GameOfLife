@@ -19,17 +19,15 @@ GameConwayRules::GameConwayRules(const std::string &configFile)
 
 void GameConwayRules::checkCell(GOL::CellState &cellState, unsigned int nbAliveCellAround)
 {
+    cellState.previously = cellState.isAlive;
+
     if (nbAliveCellAround > 3 || nbAliveCellAround < 2)
     {
-        cellState.nextState = GOL::CellNextState::DEAD;
+        cellState.isAlive = false;
     }
     else if (nbAliveCellAround == 3)
     {
-        cellState.nextState = GOL::CellNextState::ALIVE;
-    }
-    else if (nbAliveCellAround == 2)
-    {
-        cellState.nextState = cellState.isAlive ? GOL::CellNextState::ALIVE : GOL::CellNextState::DEAD;
+        cellState.isAlive = true;
     }
 }
 }

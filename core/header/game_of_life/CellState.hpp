@@ -5,13 +5,6 @@
 
 namespace GOL
 {
-enum CellNextState
-{
-    ALIVE,
-    DEAD,
-    UNKNOWN,
-};
-
 /**
  * Represent a cell state
  *
@@ -20,7 +13,7 @@ enum CellNextState
 struct CellState
 {
     bool isAlive {false}; /**< TRUE if the cell state is ALIVE, FALSE otherwise */
-    CellNextState nextState {UNKNOWN}; /**< TRUE if the cell state is ALIVE, FALSE otherwise */
+    bool previously {false}; /**< TRUE if the cell state was ALIVE, FALSE otherwise */
 };
 }
 

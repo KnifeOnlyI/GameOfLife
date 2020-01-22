@@ -24,9 +24,9 @@ file(
 if (SFML_DIR)
     find_package(SFML REQUIRED)
 else ()
-    set(SFML_SYSTEM sfml-system)
-    set(SFML_WINDOW sfml-window)
-    set(SFML_GRAPHICS sfml-graphics)
+    set(SFML_LIBRARY_SYSTEM sfml-system)
+    set(SFML_LIBRARY_WINDOW sfml-window)
+    set(SFML_LIBRARY_GRAPHICS sfml-graphics)
 endif ()
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
@@ -35,4 +35,4 @@ include_directories(${CMAKE_SOURCE_DIR}/core/header)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 
-target_link_libraries(${PROJECT_NAME} ${SFML_SYSTEM} ${SFML_WINDOW} ${SFML_GRAPHICS})
+target_link_libraries(${PROJECT_NAME} ${SFML_LIBRARY_SYSTEM} ${SFML_LIBRARY_WINDOW} ${SFML_LIBRARY_GRAPHICS})
