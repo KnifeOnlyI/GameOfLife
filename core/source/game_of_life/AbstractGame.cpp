@@ -13,7 +13,7 @@ AbstractGame::AbstractGame()
 {
     std::default_random_engine generator {(unsigned long) std::chrono::system_clock::now().time_since_epoch().count()};
 
-    std::uniform_int_distribution<int> distribution {0, 25};
+    std::uniform_int_distribution<int> distribution {0, 10};
 
     _map = std::make_unique<std::array<std::array<GOL::CellState, MAP_HEIGHT>, MAP_WIDTH>>();
 
@@ -74,13 +74,43 @@ void AbstractGame::start()
             {
                 _window.close();
             }
+            else if (event.type == sf::Event::KeyPressed)
+            {
+                if (event.key.code == sf::Keyboard::Key::Space)
+                {
+
+                    _paused = !_paused;
+                }
+                else if (event.key.code == sf::Keyboard::Key::R)
+                {
+                    _waitingTime = WAITING_TIME_MS;
+                }
+            }
+            else if ((event.type == sf::Event::MouseWheelScrolled) && (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel))
+            {
+                if (event.mouseWheelScroll.delta == 1)
+                {
+                    _waitingTime -= 2;
+
+                    if (_waitingTime < 0)
+                    {
+                        _waitingTime = 0;
+                    }
+                }
+                else if (event.mouseWheelScroll.delta == -1)
+                {
+                    _waitingTime += 2;
+                }
+            }
         }
 
-        _window.clear();
-        executeOneTurn();
-        _window.display();
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(WAITING_TIME_MS));
+        if (!_paused)
+        {
+            _window.clear();
+            executeOneTurn();
+            _window.display();
+            std::this_thread::sleep_for(std::chrono::milliseconds(_waitingTime));
+        }
     }
 
     std::cout << "Turn numbers : " << _turnNumber << '\n';

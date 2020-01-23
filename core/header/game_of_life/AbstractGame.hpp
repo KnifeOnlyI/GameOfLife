@@ -149,13 +149,22 @@ public:
 
 private:
     /** \var The window */
-    sf::RenderWindow _window {sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Game of life", sf::Style::Fullscreen};
+    sf::RenderWindow _window {sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Game of life", sf::Style::Default};
 
     /** \var The cell shape */
     sf::RectangleShape _cellShape {sf::Vector2f {CELL_WIDTH, CELL_HEIGHT}};
 
+    /** \var The alive cell color */
     sf::Color _aliveCellColor {255, 255, 255};
+
+    /** \var The dead cell color */
     sf::Color _deadCellColor {0, 0, 0};
+
+    /** \var TRUE if the game is in pause, FALSE otherwise */
+    bool _paused {false};
+
+    /** \var Time to wait between every turn */
+    int _waitingTime {WAITING_TIME_MS};
 
     /** \var The turn number */
     unsigned int _turnNumber {0};
