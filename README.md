@@ -6,6 +6,7 @@ Game of life written in C++
 
 - [x] Game structure and rules
 - [x] Graphical interface to execute the game
+- [x] Increase/Decrease speed with mouse wheel
+- [x] Pause the game
 - [ ] Build start map with graphical interface
-- [ ] Increase/Decrease speed with mouse wheel
 - [ ] Other rule with randomization
